@@ -1,3 +1,5 @@
+<img src="https://raw.githubusercontent.com/moarster/mermaid-rs-remote-renderer/main/assets/icon.svg" alt="Remote Mermaid Renderer" width="96" style="float: left" >
+
 # Remote Mermaid diagrams renderer
 
 [![CI](https://github.com/moarster/mermaid-rs-remote-renderer/actions/workflows/ci.yml/badge.svg)](https://github.com/moarster/mermaid-rs-remote-renderer/actions/workflows/ci.yml)

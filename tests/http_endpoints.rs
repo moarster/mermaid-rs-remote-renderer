@@ -99,15 +99,50 @@ async fn health_returns_ok() {
 }
 
 #[tokio::test]
-async fn index_returns_usage_text() {
+async fn index_returns_html_landing_page() {
     let response = app(unlimited_test_config())
         .oneshot(req("/"))
         .await
         .unwrap();
     assert_eq!(response.status(), StatusCode::OK);
+    let content_type = response
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or_default()
+        .to_string();
+    assert!(
+        content_type.starts_with("text/html"),
+        "expected text/html, got {content_type}"
+    );
     let body = body_string(response).await;
-    assert!(body.contains("/svg/:encoded"));
+    assert!(body.contains("<!DOCTYPE html>"));
+    assert!(body.contains("API reference"));
+    assert!(body.contains("/svg/{encoded}"));
     assert!(body.contains("/health"));
+    assert!(body.contains("mermaid-rs-renderer"));
+    assert!(body.contains("/favicon.svg"));
+}
+
+#[tokio::test]
+async fn favicon_is_served_as_svg() {
+    let response = app(unlimited_test_config())
+        .oneshot(req("/favicon.svg"))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let content_type = response
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or_default()
+        .to_string();
+    assert_eq!(content_type, "image/svg+xml");
+    let body = body_string(response).await;
+    assert!(body.contains("<svg"));
+    // The differentiating accent dot — guards against accidentally serving
+    // the upstream Mermaid icon if `icon.svg` ever gets reverted.
+    assert!(body.contains("<circle"));
 }
 
 #[tokio::test]

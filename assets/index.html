@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Remote — Mermaid renderer</title>
+    <meta name="description" content="A small HTTP service that renders Mermaid diagrams to SVG. Kroki / mermaid.ink-compatible URLs.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        :root {
+            --accent: #0d9488;
+            --accent-dark: #0f766e;
+            --accent-soft: #ccfbf1;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --bg: #ffffff;
+            --code-bg: #f8fafc;
+        }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .wrap {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 1.5rem;
+        }
+        header.hero {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+        .logo { width: 72px; height: 72px; flex-shrink: 0; }
+        .hero h1 {
+            font-size: 2rem;
+            margin: 0 0 .25rem 0;
+            letter-spacing: -.02em;
+            line-height: 1.1;
+        }
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+        h2 {
+            font-size: 1.4rem;
+            margin: 2.5rem 0 1rem 0;
+            color: var(--text);
+            border-left: 4px solid var(--accent);
+            padding-left: .75rem;
+            line-height: 1.2;
+        }
+        h3 {
+            font-size: 1rem;
+            margin: 1.75rem 0 .5rem 0;
+            color: var(--accent-dark);
+            font-weight: 600;
+        }
+        a {
+            color: var(--accent-dark);
+            text-decoration: underline;
+            text-decoration-color: var(--accent-soft);
+            text-underline-offset: 2px;
+            transition: text-decoration-color .15s ease;
+        }
+        a:hover { text-decoration-color: var(--accent); }
+        code, pre, .endpoint, .method {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+        }
+        code {
+            background: var(--code-bg);
+            padding: .12em .4em;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-size: .9em;
+        }
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+            line-height: 1.5;
+            font-size: .9rem;
+        }
+        pre code {
+            background: transparent;
+            border: 0;
+            padding: 0;
+            font-size: inherit;
+        }
+        .endpoint {
+            display: inline-block;
+            background: var(--accent-soft);
+            color: var(--accent-dark);
+            padding: .15em .55em;
+            border-radius: 4px;
+            font-size: .9em;
+            font-weight: 600;
+        }
+        .method {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: .15em .55em;
+            border-radius: 4px;
+            font-size: .8em;
+            font-weight: 700;
+            letter-spacing: .04em;
+            margin-right: .35em;
+            vertical-align: middle;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: .75rem 0 1.25rem 0;
+            font-size: .95em;
+        }
+        th, td {
+            text-align: left;
+            padding: .5rem .75rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        th {
+            color: var(--muted);
+            font-weight: 600;
+            font-size: .78em;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .lede { color: var(--muted); font-size: 1rem; }
+        .promo {
+            margin: 1.25rem 0 0 0;
+            padding: 1.5rem 1.75rem;
+            background: linear-gradient(135deg, var(--accent-soft) 0%, #f0fdfa 100%);
+            border: 1px solid var(--accent-soft);
+            border-left: 4px solid var(--accent);
+            border-radius: 8px;
+        }
+        .promo .eyebrow {
+            display: inline-block;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--accent-dark);
+            margin-bottom: .5rem;
+        }
+        .promo h3 {
+            margin: 0 0 .5rem 0;
+            font-size: 1.35rem;
+            color: var(--text);
+            font-weight: 700;
+        }
+        .promo h3 a {
+            color: var(--text);
+            text-decoration: none;
+        }
+        .promo h3 a:hover { color: var(--accent-dark); }
+        .promo p {
+            margin: 0 0 1rem 0;
+            color: var(--text);
+        }
+        .promo .cta {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: .5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: .95rem;
+            transition: background .15s ease;
+        }
+        .promo .cta:hover { background: var(--accent-dark); }
+        footer {
+            margin-top: 3.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: .9em;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: .5rem 1.5rem;
+        }
+        @media (max-width: 540px) {
+            header.hero {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: .75rem;
+            }
+            .hero h1 { font-size: 1.6rem; }
+            .wrap { padding: 1.5rem 1rem; }
+            h2 { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <header class="hero">
+        <svg class="logo" viewBox="0 0 490 490" xmlns="http://www.w3.org/2000/svg" aria-label="Remote logo" role="img">
+            <path d="M490.16,84.61C490.16,37.912 452.248,0 405.55,0L84.61,0C37.912,0 0,37.912 0,84.61L0,405.55C0,452.248 37.912,490.16 84.61,490.16L405.55,490.16C452.248,490.16 490.16,452.248 490.16,405.55L490.16,84.61Z" fill="#0d9488"/>
+            <path d="M407.48,111.18C335.587,108.103 269.573,152.338 245.08,220C220.587,152.338 154.573,108.103 82.68,111.18C80.285,168.229 107.577,222.632 154.74,254.82C178.908,271.419 193.35,298.951 193.27,328.27L193.27,379.13L296.9,379.13L296.9,328.27C296.816,298.953 311.255,271.42 335.42,254.82C382.596,222.644 409.892,168.233 407.48,111.18Z" fill="white"/>
+            <circle cx="245" cy="178" r="22" fill="white"/>
+        </svg>
+        <div>
+            <h1>Remote Mermaid Renderer</h1>
+            <p>A small HTTP service that renders <strong>Mermaid</strong> diagrams to SVG</p>
+        </div>
+    </header>
+
+    <p class="lede">Encode a Mermaid source as <code>base64url</code> (or <code>pako:</code> + zlib-deflated JSON) and <code>GET</code> it under <code>/svg/…</code> — the response is an inlineable <code>image/svg+xml</code>.</p>
+
+    <h2>API reference</h2>
+
+    <h3><span class="method">GET</span><span class="endpoint">/svg/{encoded}</span></h3>
+    <p>Render a Mermaid diagram. <code>{encoded}</code> is one of:</p>
+    <ul>
+        <li><strong>Plain</strong>: <code>base64url(source)</code> — URL-safe alphabet, padding optional.</li>
+        <li><strong>Compressed</strong>: <code>pako:</code> + <code>base64url(zlib_deflate(json))</code> where the JSON payload is <code>{"code": "&lt;source&gt;", "mermaid": {"theme": "&lt;name&gt;"}}</code>.</li>
+    </ul>
+    <table>
+        <thead><tr><th>Param</th><th>Where</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr>
+                <td><code>theme</code></td>
+                <td>query</td>
+                <td>Optional. Overrides the theme baked into the <code>pako:</code> payload. <code>default</code>&nbsp;/&nbsp;<code>neutral</code>&nbsp;/&nbsp;<code>base</code> map to the classic Mermaid look; anything else (or absent) yields the modern theme.</td>
+            </tr>
+            <tr>
+                <td><code>token</code></td>
+                <td>query or <code>X-Api-Token</code> header</td>
+                <td>Required only when the operator has enabled the API token gate.</td>
+            </tr>
+        </tbody>
+    </table>
+    <p><strong>Response:</strong> <code>200</code> with the SVG body and <code>Cache-Control: public, max-age=31536000, immutable</code>. Errors map to <code>400</code> (decode failure), <code>401</code> (missing/invalid token), <code>429</code> (per-IP rate limit), <code>503</code> (concurrency cap reached), or <code>504</code> (render exceeded its deadline).</p>
+<pre><code>ENC=$(printf 'flowchart LR; A--&gt;B--&gt;C' | base64 | tr '+/' '-_' | tr -d '=')
+curl -s "http://localhost:3000/svg/${ENC}" &gt; out.svg</code></pre>
+
+    <h3><span class="method">GET</span><span class="endpoint">/health</span></h3>
+    <p>Liveness probe. Returns the literal string <code>ok</code> as <code>text/plain</code>. Always public — exempt from the optional API token gate so uptime monitors keep working without credentials.</p>
+<pre><code>curl -fsS http://localhost:3000/health</code></pre>
+
+    <h3><span class="method">GET</span><span class="endpoint">/</span></h3>
+    <p>This page.</p>
+
+    <h2>Powered by</h2>
+    <div class="promo">
+        <span class="eyebrow">The renderer</span>
+        <h3><a href="https://github.com/1jehuang/mermaid-rs-renderer">mermaid-rs-renderer</a></h3>
+        <p>A pure-Rust Mermaid renderer — parsing, layout, and SVG emission with no Node, no headless browser, no JavaScript runtime. This service is just a thin HTTP wrapper around it; every diagram you see is their work. If you find it useful, give them a star.</p>
+        <a class="cta" href="https://github.com/1jehuang/mermaid-rs-renderer">Star on GitHub →</a>
+    </div>
+
+    <footer>
+        <span>MIT-licensed. </span>
+        <span><a href="https://github.com/moarster/mermaid-rs-remote-renderer">Source on GitHub →</a></span>
+    </footer>
+
+</div>
+</body>
+</html>

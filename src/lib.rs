@@ -4,7 +4,8 @@
 //! Routes:
 //! - `GET /svg/:encoded` – returns `image/svg+xml`
 //! - `GET /health`       – returns `ok`
-//! - `GET /`             – short usage help
+//! - `GET /`             – HTML landing page (API reference + credits)
+//! - `GET /favicon.svg`  – the page favicon (also reused as the project mark)
 //!
 //! `:encoded` accepts both formats produced by the reference Java encoder:
 //! - plain base64url of the raw Mermaid source, or
@@ -80,6 +81,7 @@ pub fn app(config: ServerConfig) -> Router {
 
     let mut router = Router::new()
         .route("/", get(index))
+        .route("/favicon.svg", get(favicon))
         .route("/health", get(health))
         .route("/svg/{encoded}", get(render_svg_route))
         .with_state(state);
@@ -206,14 +208,23 @@ async fn shutdown_signal() {
 
 // ---------- handlers ----------
 
+const INDEX_HTML: &str = include_str!("../assets/index.html");
+const FAVICON_SVG: &str = include_str!("../assets/icon.svg");
+
 async fn index() -> impl IntoResponse {
     (
-        [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-        "mermaid-rs-remote-renderer\n\n\
-         GET /svg/:encoded         – render Mermaid to SVG\n\
-         GET /svg/:encoded?theme=  – override theme (default | modern)\n\
-         GET /health               – liveness probe\n\n\
-         :encoded is either base64url(source) or 'pako:' + base64url(deflate(json))\n",
+        [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
+        INDEX_HTML,
+    )
+}
+
+async fn favicon() -> impl IntoResponse {
+    (
+        [
+            (header::CONTENT_TYPE, "image/svg+xml"),
+            (header::CACHE_CONTROL, "public, max-age=86400"),
+        ],
+        FAVICON_SVG,
     )
 }
 
@@ -309,7 +320,7 @@ async fn require_api_token(
     next: Next,
 ) -> Response {
     let path = request.uri().path();
-    if matches!(path, "/" | "/health") {
+    if matches!(path, "/" | "/health" | "/favicon.svg") {
         return next.run(request).await;
     }
 

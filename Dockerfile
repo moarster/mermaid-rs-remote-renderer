@@ -18,6 +18,7 @@ RUN mkdir -p src && \
     rm -rf src
 
 COPY src ./src
+COPY assets ./assets
 
 # Touch the entrypoints so cargo notices the real sources and recompiles them.
 RUN touch src/main.rs src/lib.rs && \
