@@ -2,7 +2,7 @@
 
 # ---------- builder ----------
 # Pinned Rust toolchain image; bumping this here is the single source of truth.
-FROM rust:1.91-slim-bookworm AS builder
+FROM rust:1.95-slim-bookworm AS builder
 
 ENV CARGO_TERM_COLOR=always \
     RUSTFLAGS="-C target-cpu=x86-64-v2"
