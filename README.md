@@ -1,4 +1,4 @@
-# Remote
+# Remote Mermaid diagrams renderer
 
 [![CI](https://github.com/moarster/mermaid-rs-remote-renderer/actions/workflows/ci.yml/badge.svg)](https://github.com/moarster/mermaid-rs-remote-renderer/actions/workflows/ci.yml)
 [![CD](https://github.com/moarster/mermaid-rs-remote-renderer/actions/workflows/cd.yml/badge.svg)](https://github.com/moarster/mermaid-rs-remote-renderer/actions/workflows/cd.yml)

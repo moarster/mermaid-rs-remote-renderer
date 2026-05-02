@@ -5,8 +5,8 @@ services:
       context: .
     container_name: mmdr-remote-renderer
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:3000:3000"
+#    ports:
+#      - "127.0.0.1:3000:3000"
     environment:
       MMDR_BIND: "0.0.0.0:3000"
       MMDR_RPM: "60"
