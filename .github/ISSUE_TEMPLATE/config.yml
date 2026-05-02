@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Renderer / SVG output bug
+    url: https://github.com/1jehuang/mermaid-rs-renderer/issues
+    about: This repo only wraps the renderer in HTTP. Layout, parsing, and SVG-output bugs belong upstream in mermaid-rs-renderer.
+  - name: Question or discussion
+    url: https://github.com/moarster/mermaid-rs-remote-renderer/discussions
+    about: Use Discussions for open-ended questions or "would you accept X?" before opening an issue.

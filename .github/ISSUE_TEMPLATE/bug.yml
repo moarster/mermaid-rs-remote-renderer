@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in this HTTP server isn't working as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **If the SVG output itself is wrong** (broken layout, missing
+        nodes, parser crash on valid Mermaid), please file at
+        <https://github.com/1jehuang/mermaid-rs-renderer> instead — that's
+        where the rendering logic lives. This template is for the HTTP
+        wrapper itself: routing, decoding, rate limiting, timeouts,
+        container, deployment glue.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear, concise description.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: Exact request, including the encoded payload if relevant.
+      placeholder: |
+        curl -v "http://localhost:3000/svg/Zmxvd2NoYXJ0IExSOyBBLS0-Qg"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: Output of `cargo pkgid`, or the git SHA you're running.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: How are you running it (cargo / docker / compose), OS, any non-default config (env vars, CLI flags).
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Trim to the relevant span. Redact any secrets.
+      render: shell

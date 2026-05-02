@@ -1,0 +1,41 @@
+services:
+  mmdr:
+    image: ${MMDR_IMAGE:-ghcr.io/moarster/mermaid-rs-remote-renderer:latest}
+    build:
+      context: .
+    container_name: mmdr-remote-renderer
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      MMDR_BIND: "0.0.0.0:3000"
+      MMDR_RPM: "60"
+      MMDR_BURST: "20"
+      MMDR_MAX_BODY_BYTES: "65536"
+      MMDR_MAX_CONCURRENT: "16"
+      MMDR_RENDER_TIMEOUT_SECS: "10"
+      MMDR_REQUEST_TIMEOUT_SECS: "15"
+      # Set to "true" only when running behind a trusted reverse proxy
+      # that sets X-Forwarded-For / Forwarded headers.
+      MMDR_TRUST_FORWARDED_FOR: "false"
+      # Uncomment to require a token on /svg/* requests:
+      # MMDR_API_TOKEN: "change-me"
+      RUST_LOG: "info"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "1.0"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,size=16m,nosuid,nodev

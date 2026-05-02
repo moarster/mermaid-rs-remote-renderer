@@ -1,0 +1,53 @@
+[package]
+name = "mermaid-rs-remote-renderer"
+version = "0.1.0"
+edition = "2024"
+description = "HTTP server exposing the mermaid-rs-renderer pipeline as a kroki / mermaid.ink-compatible endpoint"
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+mermaid-rs-renderer = { version = "0.2", default-features = false }  # skip CLI/PNG features
+
+# Async runtime
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "net", "time", "sync"] }
+
+# HTTP stack
+axum = { version = "0.8.9", default-features = false, features = ["http1", "tokio", "query"] }
+tower = { version = "0.5", default-features = false, features = ["util", "limit", "load-shed"] }
+tower-http = { version = "0.6", default-features = false, features = [
+    "trace",
+    "limit",
+    "request-id",
+    "util",
+    "set-header",
+    "timeout",
+] }
+tower_governor = { version = "0.8", default-features = false, features = ["axum"] }
+
+# Decoding / encoding
+base64 = "0.22"
+miniz_oxide = "0.9.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Errors / utilities
+thiserror = "2"
+anyhow = "1"
+clap = { version = "4.5", features = ["derive", "env"] }
+uuid = { version = "1", default-features = false, features = ["v4", "fast-rng"] }
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tower = { version = "0.5", default-features = false, features = ["util"] }
+http-body-util = "0.1"
+hyper = { version = "1", features = ["http1", "client"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "test-util", "time"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest a new capability or enhancement to the HTTP wrapper.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What can't you do today, or what's painful about the current behavior?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This is about the HTTP wrapper, not Mermaid rendering itself.
+          required: true
+        - label: This doesn't add operator-specific deployment config (reverse proxy, hostnames, ACME) to repo files.
+          required: true

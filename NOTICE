@@ -1,0 +1,33 @@
+mermaid-rs-remote-renderer
+==========================
+
+This product is a derivative work based on the upstream open-source project
+**mermaid-rs-renderer** (https://github.com/1jehuang/mermaid-rs-renderer),
+which is distributed under the MIT License.
+
+The upstream library performs all of the heavy lifting: parsing Mermaid
+syntax, computing layout, and rendering SVG. This project (the
+"remote-renderer") wraps that library behind an HTTP server that exposes
+a kroki / mermaid.ink-compatible GET endpoint, plus production hardening
+(structured logging, per-IP rate limiting, concurrency caps, body size and
+render timeouts, optional token gate, and Docker/CI tooling).
+
+The original `LICENSE` file from the upstream project is preserved and
+applies to the underlying library code. The MIT License text in this
+repository's `LICENSE` file covers both the upstream copyright holders and
+contributions made in this fork.
+
+Upstream attribution
+--------------------
+- Project:       mermaid-rs-renderer
+- Upstream URL:  https://github.com/1jehuang/mermaid-rs-renderer
+- Author:        Jeremy Huang and the mermaid-rs-renderer contributors
+- License:       MIT
+
+Local upstream checkout used during fork creation:
+    /home/ivan/Work/mermaid-rs-renderer
+
+Acknowledgements
+----------------
+Thanks to the upstream maintainers for the rendering pipeline that makes this
+service possible.
